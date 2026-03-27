@@ -8,13 +8,13 @@ class Play{
     fill(255);
     fill(200,200,140);
     textAlign(LEFT,CENTER);
-    textSize(40);
-    text("+"+str(score)+"P",posX+100,posY+25);
+    textSize(40*UISCALE);
+    text("+"+str(score)+"P",posX+(100*UISCALE),posY+(25*UISCALE));
     moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(200);
-    line(posX,posY,posX+width/8,posY);
-    return 96;
+    line(posX,posY,posX+spaltmas,posY);
+    return 96*UISCALE;
   }
 }
 
@@ -24,19 +24,19 @@ class PlaySub extends Play{
 
     fill(128,0,0);
     noStroke();
-    rect(posX+2,posY+2,width/8-3,94);
+    rect(posX+2,posY+2,spaltmas-3,94*UISCALE);
     fill(200,200,140);
-    textSize(40);
+    textSize(40*UISCALE);
     textAlign(LEFT,CENTER);
-    text(str(score)+"P",posX+100,posY+25);
-    textSize(20);
+    text(str(score)+"P",posX+(100*UISCALE),posY+(25*UISCALE));
+    textSize(20*UISCALE);
     textAlign(RIGHT,CENTER);
-    text("-> "+To,posX-20+width/8,posY+70);
+    text("-> "+To,posX-(20*UISCALE)+spaltmas,posY+(70*UISCALE));
     moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(255);
-    line(posX,posY,posX+width/8,posY);
-    return 96;
+    line(posX,posY,posX+spaltmas,posY);
+    return 96*UISCALE;
   }
 }
 
@@ -46,18 +46,18 @@ class PlayAdd extends Play{
     
     fill(0,128,0);
     noStroke();
-    rect(posX+2,posY+2,width/8-3,94);
+    rect(posX+2,posY+2,spaltmas-3,94*UISCALE);
     fill(200,200,140);
-    textSize(40);
+    textSize(40*UISCALE);
     textAlign(LEFT,CENTER);
-    text("+"+str(score)+"P",posX+100,posY+25);
-    textSize(20);
+    text(str(score)+"P",posX+(100*UISCALE),posY+(25*UISCALE));
+    textSize(20*UISCALE);
     textAlign(RIGHT,CENTER);
-    text(From+" ->",posX-20+width/8,posY+70);
+    text("<- "+From,posX-(20*UISCALE)+spaltmas,posY+(70*UISCALE));
     moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(255);
-    line(posX,posY,posX+width/8,posY);
-    return 96;
+    line(posX,posY,posX+spaltmas,posY);
+    return 96*UISCALE;
   }
 }

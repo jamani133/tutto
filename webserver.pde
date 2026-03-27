@@ -58,6 +58,3 @@ char extractKey(String request) {
 void sendOK(Client client) {
   client.write("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK");
 }
-
-
-// 🎯 Your custom handler

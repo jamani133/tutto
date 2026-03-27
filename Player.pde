@@ -11,8 +11,8 @@ class Player{
   
   void cscore(boolean safe,boolean tut){
     
-    if(curMod.equals("lucky")){
-      addPlay(0,false);
+    if(curMod.equals("lucky") || curMod.equals("skip")){
+      addPlay(0,true);
       return;
     }
     
@@ -41,7 +41,7 @@ class Player{
     }
     
     
-    if(curMod.equals("x2")){  //x2 
+    if(curMod.equals("x2") && checkTutto()){  //x2 
       addPlay(calcScore()*2,true);
       return;
     }
@@ -49,7 +49,7 @@ class Player{
       addPlay(calcScore()+bonusPoints(),true);
       return;
     }
-    addPlay(safe?calcScore():0,false);
+    addPlay((safe)?calcScore():0,curMod.equals("party"));
   }
   
   void addPlay(int sc,boolean succ){
@@ -65,22 +65,22 @@ class Player{
   void draw(float posX){
     stroke(255);
     strokeWeight(3);
-    line(posX+width/8,h3,posX+width/8,height);
+    line(posX+spaltmas,h3,posX+spaltmas,height);
     fill(255);
-    textSize(40);
+    textSize(40*UISCALE);
     textAlign(LEFT,CENTER);
-    text(name,posX+10,h3+25);
+    text(name,posX+(10*UISCALE),h3+(25*UISCALE));
     textAlign(RIGHT,CENTER);
-    text(str(score)+"P",posX+(width/8)-10,h3+65);
-    float posY = h3+90;
+    text(str(score)+"P",posX+((spaltmas-10)*UISCALE),h3+(65*UISCALE));
+    float posY = h3+(90*UISCALE);
     for( int i = plays.size()-1; i>=0;i--){
       posY += plays.get(i).render(posX,posY);
     }
     if(this == players.get(playerIndex)){
       stroke(0,200,255);
-      strokeWeight(8);
+      strokeWeight(8*UISCALE);
       noFill();
-      rect(posX+5,height/3+5,width/8-9,2*height/3-9);
+      rect(posX+(5*UISCALE),height/3+(5*UISCALE),spaltmas-(9*UISCALE),2*height/3-(9*UISCALE));
     }
   }
 }
@@ -96,7 +96,7 @@ String remove1000top(Player too){
   for ( Player p : players){
     if(best == p.score && p != too){
       PlaySub lp = new PlaySub();
-      lp.score = -1000;
+      lp.score = -min(1000,p.score);
       lp.To = too.name;
       lp.success = true;
       lp.mod = "stolen";
@@ -106,7 +106,7 @@ String remove1000top(Player too){
         n = "Group";
       }
       p.plays.add(lp);
-      p.score -= 1000;
+      p.score += lp.score;
     }
   }
   return n;

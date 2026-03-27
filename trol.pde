@@ -1,5 +1,8 @@
 import processing.net.*;
 
+float UISCALE = 1;
+int COLS      = 8;
+
 Server server;
 
 ArrayList<Player> players;
@@ -20,6 +23,7 @@ int h16 = 0;
 int h24 = 0;
 int h32 = 0;
 int h64 = 0;
+float spaltmas = width/8;
 int diceleft = 6;
 String curMod = "none";
 
@@ -34,6 +38,8 @@ void setup(){
     players.add(new Player(n));
   }
   fullScreen();
+  //surface.setResizable(true);
+  //size(720,480);
   h3  = height/3;
   h8  = height/8;
   h12 = height/12;
@@ -41,16 +47,19 @@ void setup(){
   h24 = height/24;
   h32 = height/32;
   h64 = height/64;
+  spaltmas = width/COLS;
   setupServer();
   doSB();
+  UISCALE = width/1920.0;
 }
 
 void draw(){
   background(0,64,0);
-  playerList3();
+  playerList();
   current();
   layout();
   runServer();
+  //UISCALE = width/1920.0;
 }
 
 void handleInput(char k) {
@@ -108,61 +117,98 @@ void keyPress(char k){
   if(k == 'j'){curMod = "400";}
   if(k == 'k'){curMod = "500";}
   if(k == 'l'){curMod = "600";}
-  
+ 
   if(k == 'x'){curMod = "skip";}
   if(k == 'U'){curMod = "lucky";endTurn(false,false);}
-  if(k == '<'){playerIndex--;if(playerIndex<0){playerIndex=players.size()-1;}}
-  if(k == '>'){playerIndex++;if(playerIndex>=players.size()){playerIndex=0;}}
-  
+  if(k == 'n'){playerIndex--;if(playerIndex<0){playerIndex=players.size()-1;}}
+  if(k == 'm'){playerIndex++;if(playerIndex>=players.size()){playerIndex=0;}}
 }
 
 
 void current(){
-  float posX = width/3;
+  float posX = 16*height/27;
   for(Pull p : pulls){
     posX += p.draw(posX);
   }
   fill(255);
   noStroke();
   textAlign(LEFT,CENTER);
-  textSize(100);
-  text(players.get(playerIndex).name,30,50);
-  textSize(40);
-  text("Score : "+players.get(playerIndex).score+"P",30,110);
-  text("Table : "+calcScore()+"P",width/6,110);
+  textSize(100*UISCALE);
+  text(players.get(playerIndex).name,30*UISCALE,50*UISCALE);
+  textSize(40*UISCALE);
+  text("Score : "+players.get(playerIndex).score+"P",30*UISCALE,110*UISCALE);
+  text("Table : "+calcScore()+"P",width/6,110*UISCALE);
   //text("Modifier : "+curMod,30,220);
-  image(pickimage(curMod,true),(width/3)-(height/6)-h32,h8,height/6,height/6);
+  image(pickimage(curMod,true),(16*height/27)-(height/6)-(h32),(height/3)-(height/6)-h32,height/6,height/6);
   fill(255,200,0);
-  textSize(45);
+  textSize(45*UISCALE);
 
-  text("1. "+first.name,h32,200);
+  text("1. "+first.name,h32,200*UISCALE);
   textAlign(RIGHT,CENTER);
-  text(first.score,height/3,200);
+  text(first.score,height/3,200*UISCALE);
   fill(200,200,255);
-  textSize(40);
+  textSize(40*UISCALE);
   textAlign(LEFT,CENTER);
-  text("2. "+second.name,h32,260);
+  text("2. "+second.name,h32,260*UISCALE);
   textAlign(RIGHT,CENTER);
-  text(second.score,height/3,260);
+  text(second.score,height/3,260*UISCALE);
   fill(180,150,80);
-  textSize(40);
+  textSize(40*UISCALE);
   textAlign(LEFT,CENTER);
-  text("3. "+third.name,h32,320);
+  text("3. "+third.name,h32,320*UISCALE);
   textAlign(RIGHT,CENTER);
-  text(third.score,height/3,320);
+  text(third.score,height/3,320*UISCALE);
 }
 
 void layout(){
   strokeWeight(4);
   stroke(255);
   line(0,h3,width,h3);
-  line(width/3,0,width/3,h3);
+  line(16*height/27,0,16*height/27,h3);
+  //line(3*spaltmas,height/3,3*spaltmas,height);
+}
+
+int pwrap(int i){
+  return (i+players.size())%players.size();
 }
 
 void playerList(){
-  for(int i=0;i<8;i++){
+  players.get(pwrap(playerIndex-1)).draw(0);
+  players.get(pwrap(playerIndex)).draw(spaltmas);
+  players.get(pwrap(playerIndex+1)).draw(spaltmas*2);
+  int i = height/3;
+  int xi = int(spaltmas*3);
+  
+  
+  for(Player p : players){
+    stroke(255);
+    strokeWeight(2);
+    textSize(40);
+    noFill();
+    rect(xi,i,spaltmas*5/3,height/12);
+    fill(255);
+    textAlign(LEFT,CENTER);
+    text(p.name,xi+h32,i+h24);
+    textAlign(RIGHT,CENTER);
+    text(p.score+" P",xi+(spaltmas*5/3)-h32,i+h24);
+    if(first == p){
+      stroke(255,200,0);
+      strokeWeight(6);
+      noFill();
+      rect(xi+4,i+4,spaltmas*5/3-8,height/12-8);
+    }
+    i += height/12;
+    if(i > height*11/12){
+      i = height/3;
+      xi+=spaltmas*5/3;
+    }
+  }
+}
+/*
+void playerList(){
+  for(int i=0;i<10;i++){
     
-    players.get((i+playerIndex+players.size()-1)%players.size()).draw(i*(width/8));
+    players.get(i).draw(i*(spaltmas));
     
   }
 }
@@ -170,7 +216,7 @@ void playerList(){
 void playerList2(){
   int i = 0;
   for(Player p : players){
-    p.draw(i*width/8-(min(1.0,max(0.0,(sin(float(millis())/2000.0)+0.5)))*max(players.size()-8,0)*(width/8)));
+    p.draw(i*spaltmas-(min(1.0,max(0.0,(sin(float(millis())/2000.0)+0.5)))*max(players.size()-8,0)*(spaltmas)));
     i++;
   }
 }
@@ -178,11 +224,11 @@ void playerList2(){
 void playerList3(){
   int i = 0;
   for(Player p : players){
-    p.draw((((millis()/2000.0+i)%players.size())-1)*(width/8));
+    p.draw((((millis()/2000.0+i)%players.size())-1)*(spaltmas));
     i++;
   }
 }
-
+*/
 void endTurn(boolean safe , boolean tut){
   
   
@@ -283,8 +329,8 @@ boolean checkStreet(){
 
 void fuck(){
   
-  playerIndex -= 1;
-  if(playerIndex<0){playerIndex = players.size()-1;}
+  //playerIndex -= 1;
+  //if(playerIndex<0){playerIndex = players.size()-1;}
   if(players.get(playerIndex).plays.size() == 0){
     return;
   }
@@ -330,5 +376,5 @@ PImage pickimage(String mod, boolean success){
   return images.get(0);
 }
 void moddraw(String mod, float posX, float posY, boolean success){
-  image(pickimage(mod,success),posX+h64,posY+h64,h16,h16);
+  image(pickimage(mod,success),posX+(h64),posY+(h64),h16,h16);
 }

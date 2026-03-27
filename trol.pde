@@ -9,6 +9,7 @@ ArrayList<Pull> pulls;
 int playerIndex = 0;
 
 ArrayList<PImage> images;
+ArrayList<PImage> imagesBW;
 
 String imagePaths[] = {"none","200","300","400","500","600","x2","party","street","steal","stolen","lucky","street","none","skip"};
 
@@ -26,6 +27,7 @@ void setup(){
   pulls = new ArrayList<Pull>();
   pulls.add(new Pull());
   images = new ArrayList<PImage>();
+  imagesBW = new ArrayList<PImage>();
   loadImages();
   players = new ArrayList<Player>();
   for(String n : loadStrings("players.txt")){
@@ -40,11 +42,12 @@ void setup(){
   h32 = height/32;
   h64 = height/64;
   setupServer();
+  doSB();
 }
 
 void draw(){
   background(0,64,0);
-  playerList();
+  playerList3();
   current();
   layout();
   runServer();
@@ -77,9 +80,9 @@ void keyPress(char k){
     return;
   }
   
-  if(k == 'N'){endTurn(true,false);}
+  
   if(!curMod.equals("none")){
-    
+    if(k == 'N'){endTurn(true,false);}
     if(k == '='){endTurn(false,false);}
     if(k == 'T' && (curMod.equals("steal") ||curMod.equals("street"))){endTurn(true,true);}
   }
@@ -105,7 +108,15 @@ void keyPress(char k){
   if(k == 'j'){curMod = "400";}
   if(k == 'k'){curMod = "500";}
   if(k == 'l'){curMod = "600";}
+  
+  if(k == 'x'){curMod = "skip";}
+  if(k == 'U'){curMod = "lucky";endTurn(false,false);}
+  if(k == '<'){playerIndex--;if(playerIndex<0){playerIndex=players.size()-1;}}
+  if(k == '>'){playerIndex++;if(playerIndex>=players.size()){playerIndex=0;}}
+  
 }
+
+
 void current(){
   float posX = width/3;
   for(Pull p : pulls){
@@ -116,10 +127,29 @@ void current(){
   textAlign(LEFT,CENTER);
   textSize(100);
   text(players.get(playerIndex).name,30,50);
-  textSize(50);
-  text("Score : "+players.get(playerIndex).score+"P",30,120);
-  text("Modifier : "+curMod,30,220);
-  image(pickimage(curMod),(width/3)-(height/6)-h32,h8,height/6,height/6);
+  textSize(40);
+  text("Score : "+players.get(playerIndex).score+"P",30,110);
+  text("Table : "+calcScore()+"P",width/6,110);
+  //text("Modifier : "+curMod,30,220);
+  image(pickimage(curMod,true),(width/3)-(height/6)-h32,h8,height/6,height/6);
+  fill(255,200,0);
+  textSize(45);
+
+  text("1. "+first.name,h32,200);
+  textAlign(RIGHT,CENTER);
+  text(first.score,height/3,200);
+  fill(200,200,255);
+  textSize(40);
+  textAlign(LEFT,CENTER);
+  text("2. "+second.name,h32,260);
+  textAlign(RIGHT,CENTER);
+  text(second.score,height/3,260);
+  fill(180,150,80);
+  textSize(40);
+  textAlign(LEFT,CENTER);
+  text("3. "+third.name,h32,320);
+  textAlign(RIGHT,CENTER);
+  text(third.score,height/3,320);
 }
 
 void layout(){
@@ -145,6 +175,14 @@ void playerList2(){
   }
 }
 
+void playerList3(){
+  int i = 0;
+  for(Player p : players){
+    p.draw((((millis()/2000.0+i)%players.size())-1)*(width/8));
+    i++;
+  }
+}
+
 void endTurn(boolean safe , boolean tut){
   
   
@@ -161,8 +199,28 @@ void endTurn(boolean safe , boolean tut){
   doSB();
 }
 
+Player first;
+Player second;
+Player third;
 void doSB(){
-  
+  first = players.get(players.size()-1);
+  second = players.get(players.size()-1);
+  third = players.get(players.size()-1);
+  for(Player p : players){
+    if(first.score < p.score){
+      first = p;
+    }
+  }
+  for(Player p : players){
+    if(second.score < p.score && first != p){
+      second = p;
+    }
+  }
+  for(Player p : players){
+    if(third.score < p.score && second != p && first != p){
+      third = p;
+    }
+  }
 }
 
 
@@ -226,11 +284,12 @@ boolean checkStreet(){
 void fuck(){
   
   playerIndex -= 1;
-  if(playerIndex<0){playerIndex = 0;}
+  if(playerIndex<0){playerIndex = players.size()-1;}
   if(players.get(playerIndex).plays.size() == 0){
     return;
   }
-  if(players.get(playerIndex).plays.get(players.get(playerIndex).plays.size()-1).mod == "steal"){
+  Play a = players.get(playerIndex).plays.get(players.get(playerIndex).plays.size()-1);
+  if(a.mod == "steal" && a.score != 0){
     playerIndex += 1;
     return;
   }
@@ -252,18 +311,24 @@ boolean checkTutto(){
 void loadImages(){
   for(String i : imagePaths){
     images.add(loadImage("icons/"+i+".png"));
+    imagesBW.add(loadImage("icons/"+i+".png"));
+    imagesBW.get(imagesBW.size()-1).filter(GRAY);
   }
 }
 
 //steal, stolen, 200,300,400,500,600,party,2x, street
-PImage pickimage(String mod){
+PImage pickimage(String mod, boolean success){
   for(int i = 0;i<images.size();i++){
     if(mod.equals(imagePaths[i])){
-      return images.get(i);
+      if(success){
+        return images.get(i);
+      }else{
+        return imagesBW.get(i);
+      }
     }
   }
   return images.get(0);
 }
-void moddraw(String mod, float posX, float posY){
-  image(pickimage(mod),posX+h64,posY+h64,h16,h16);
+void moddraw(String mod, float posX, float posY, boolean success){
+  image(pickimage(mod,success),posX+h64,posY+h64,h16,h16);
 }

@@ -1,6 +1,7 @@
 class Play{
   int score = 0;
   String mod = null;
+  boolean success = false;
   float render(float posX,float posY){
 
     noStroke();
@@ -9,7 +10,7 @@ class Play{
     textAlign(LEFT,CENTER);
     textSize(40);
     text("+"+str(score)+"P",posX+100,posY+25);
-    moddraw(mod,posX,posY);
+    moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(200);
     line(posX,posY,posX+width/8,posY);
@@ -23,7 +24,7 @@ class PlaySub extends Play{
 
     fill(128,0,0);
     noStroke();
-    rect(posX+2,posY+2,width/8-4,92);
+    rect(posX+2,posY+2,width/8-3,94);
     fill(200,200,140);
     textSize(40);
     textAlign(LEFT,CENTER);
@@ -31,7 +32,7 @@ class PlaySub extends Play{
     textSize(20);
     textAlign(RIGHT,CENTER);
     text("-> "+To,posX-20+width/8,posY+70);
-    moddraw(mod,posX,posY);
+    moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(255);
     line(posX,posY,posX+width/8,posY);
@@ -45,7 +46,7 @@ class PlayAdd extends Play{
     
     fill(0,128,0);
     noStroke();
-    rect(posX+2,posY+2,width/8-4,92);
+    rect(posX+2,posY+2,width/8-3,94);
     fill(200,200,140);
     textSize(40);
     textAlign(LEFT,CENTER);
@@ -53,7 +54,7 @@ class PlayAdd extends Play{
     textSize(20);
     textAlign(RIGHT,CENTER);
     text(From+" ->",posX-20+width/8,posY+70);
-    moddraw(mod,posX,posY);
+    moddraw(mod,posX,posY,success);
     strokeWeight(2);
     stroke(255);
     line(posX,posY,posX+width/8,posY);

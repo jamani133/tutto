@@ -10,68 +10,57 @@ class Player{
   }
   
   void cscore(boolean safe,boolean tut){
-    if(safe && !tut && diceleft == 6){
-      Play lp = new Play();
-      lp.score = 0;
-      lp.mod = "skip";
-      plays.add(lp);
+    
+    if(curMod.equals("lucky")){
+      addPlay(0,false);
       return;
     }
-    if(curMod.equals("street")){
+    
+    if(curMod.equals("street")){  //street handler
       if(checkStreet() || tut){
-        Play lp = new Play();
-        lp.score = 2000;
-        lp.mod = curMod;
-        plays.add(lp);
-        score += lp.score;
+        addPlay(2000,true);
       }else{
-        Play lp = new Play();
-        lp.score = 0;
-        lp.mod = curMod;
-        plays.add(lp);
-        score += lp.score;
+        addPlay(0,false);
       }
       return;
     }
-    if((checkTutto() || (tut && curMod.equals("steal")))&& !curMod.equals("x2")){
-      if(curMod.equals("steal")){
+    
+    if(curMod.equals("steal")){ //steal checker
+      if(checkTutto() || tut){
         PlayAdd lp = new PlayAdd();
         lp.score=1000;
         lp.mod = "steal";
         lp.From = remove1000top(this);
+        lp.success = true;
         plays.add(lp);
         score += lp.score;
-        return;
+      }else{
+        addPlay(0,false);
       }
-      
-      Play lp = new Play();
-      lp.score=calcScore();
-      lp.score += bonusPoints();
-      lp.mod = curMod;
-      plays.add(lp);
-      score += lp.score;
       return;
     }
-    if(safe && !curMod.equals("steal")){
-      Play lp = new Play();
-      lp.score=calcScore();
-      if(curMod.equals("x2")){
-        lp.score *= 2;
-      }
-      lp.mod = curMod;
-      plays.add(lp);
-      score += lp.score;
-    }else{
-      //fail
-      Play lp = new Play();
-      lp.score = 0;
-      lp.mod = curMod;
-      plays.add(lp);
-      score += lp.score;
+    
+    
+    if(curMod.equals("x2")){  //x2 
+      addPlay(calcScore()*2,true);
+      return;
     }
-    
-    
+    if(checkTutto()){  //tutto 
+      addPlay(calcScore()+bonusPoints(),true);
+      return;
+    }
+    addPlay(safe?calcScore():0,false);
   }
+  
+  void addPlay(int sc,boolean succ){
+    Play lp = new Play();
+    lp.score=sc;
+    lp.success = succ;
+    lp.mod = curMod;
+    plays.add(lp);
+    score += sc;
+  }
+  
   
   void draw(float posX){
     stroke(255);
@@ -84,11 +73,15 @@ class Player{
     textAlign(RIGHT,CENTER);
     text(str(score)+"P",posX+(width/8)-10,h3+65);
     float posY = h3+90;
-    
-      for( int i = plays.size()-1; i>=0;i--){
-        posY += plays.get(i).render(posX,posY);
-      }
-    
+    for( int i = plays.size()-1; i>=0;i--){
+      posY += plays.get(i).render(posX,posY);
+    }
+    if(this == players.get(playerIndex)){
+      stroke(0,200,255);
+      strokeWeight(8);
+      noFill();
+      rect(posX+5,height/3+5,width/8-9,2*height/3-9);
+    }
   }
 }
 
@@ -105,6 +98,7 @@ String remove1000top(Player too){
       PlaySub lp = new PlaySub();
       lp.score = -1000;
       lp.To = too.name;
+      lp.success = true;
       lp.mod = "stolen";
       if(n.equals("")){
         n = p.name;
